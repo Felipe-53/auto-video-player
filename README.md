@@ -18,7 +18,7 @@ This automation uses pupuppeteer to auto-play the course videos sequentially a t
 
 It is almost pointless to make a project public without showcasing its use. In this case, though, I won't be able do it because I might be beaking terms of use of the platform.
 
-The project had some interesting patterns, like a proxy and a recursive function, so I didn't resist putting it out, even if for the sake of future reference. Se for yourself:
+The project had some interesting patterns, like a proxy and a recursive function, so I didn't resist putting it out, even if for the sake of future reference. See for yourself:
 
 #### Recursive function
 
