@@ -27,26 +27,26 @@ export default function buildVideosPlayer(page: ProxyPage) {
         waitUntil: 'networkidle2'
       })
 
-      if (!(await isThereNextVideoOnCurrentLesson())) {
+      if (!(await isThereUnwatchedVideoOnCurrentLesson())) {
         continue
       } 
 
-      await goToNextVideo()
+      await goToNextUnwatchedVideo()
       await playVideo()
     }
   }
 
   async function playVideo() {
     await playTheVideoAndWaitForItToFinish()
-    if (await isThereNextVideoOnCurrentLesson()) {
-      await goToNextVideo()
+    if (await isThereUnwatchedVideoOnCurrentLesson()) {
+      await goToNextUnwatchedVideo()
       await playVideo()
     }
     return
   }
 
   let nextVideoLinkCache: ElementHandle
-  async function isThereNextVideoOnCurrentLesson() {
+  async function isThereUnwatchedVideoOnCurrentLesson() {
     const nextVideoLinkJSHandle = await page.evaluateHandle(async (selector) => {
       const next = document.querySelector(selector)?.parentElement
       return next
@@ -62,7 +62,7 @@ export default function buildVideosPlayer(page: ProxyPage) {
     return true
   }
 
-  async function goToNextVideo() {
+  async function goToNextUnwatchedVideo() {
     await nextVideoLinkCache.click()
     await page.waitForNavigation({
       waitUntil: 'networkidle2'
