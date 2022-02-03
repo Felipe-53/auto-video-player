@@ -9,12 +9,7 @@ const selectors = {
 
 export default function buildVideosPlayer(page: ProxyPage) {
   async function playAllVideos() {
-    const lessons = await page.evaluate(async (selector) => {
-      const selectEl = document.querySelector(selector)
-      const options = Array.from(selectEl.options)
-      // @ts-ignore
-      return options.map(opt => opt.value)
-    }, selectors.select)
+    const lessons = await _getAllLessons()
 
     for (const lesson of lessons) {
       await page.evaluate(async (lesson, selectSelector) => {
@@ -27,26 +22,26 @@ export default function buildVideosPlayer(page: ProxyPage) {
         waitUntil: 'networkidle2'
       })
 
-      if (!(await isThereUnwatchedVideoOnCurrentLesson())) {
+      if (!(await _isThereUnwatchedVideoOnCurrentLesson())) {
         continue
       } 
 
-      await goToNextUnwatchedVideo()
-      await playVideo()
+      await _goToNextUnwatchedVideo()
+      await _playVideo()
     }
   }
 
-  async function playVideo() {
-    await playTheVideoAndWaitForItToFinish()
-    if (await isThereUnwatchedVideoOnCurrentLesson()) {
-      await goToNextUnwatchedVideo()
-      await playVideo()
+  async function _playVideo() {
+    await _playTheVideoAndWaitForItToFinish()
+    if (await _isThereUnwatchedVideoOnCurrentLesson()) {
+      await _goToNextUnwatchedVideo()
+      await _playVideo()
     }
     return
   }
 
   let nextVideoLinkCache: ElementHandle
-  async function isThereUnwatchedVideoOnCurrentLesson() {
+  async function _isThereUnwatchedVideoOnCurrentLesson() {
     const nextVideoLinkJSHandle = await page.evaluateHandle(async (selector) => {
       const next = document.querySelector(selector)?.parentElement
       return next
@@ -62,14 +57,14 @@ export default function buildVideosPlayer(page: ProxyPage) {
     return true
   }
 
-  async function goToNextUnwatchedVideo() {
+  async function _goToNextUnwatchedVideo() {
     await nextVideoLinkCache.click()
     await page.waitForNavigation({
-      waitUntil: 'networkidle2'
+      waitUntil: 'networkidle0'
     })
   }
 
-  async function playTheVideoAndWaitForItToFinish() {
+  async function _playTheVideoAndWaitForItToFinish() {
     await page.evaluate(() => {
       return new Promise((resolve, reject) => {
         const video = document.querySelector('#video-player_html5_api') as HTMLVideoElement
@@ -78,6 +73,17 @@ export default function buildVideosPlayer(page: ProxyPage) {
         video.addEventListener('ended', resolve)
       })
     })
+  }
+
+  async function _getAllLessons() {
+    const lessons = await page.evaluate(async (selector) => {
+      const selectEl = document.querySelector(selector)
+      const options = Array.from(selectEl.options)
+      // @ts-ignore
+      return options.map(opt => opt.value)
+    }, selectors.select)
+
+    return lessons
   }
 
   return playAllVideos
