@@ -1,9 +1,7 @@
 import puppeteer from 'puppeteer'
-import buildController from './controller/controller'
+import buildTaskManager from './manager/taskManager'
 import SelectorNotFoundError from './errors/SelectorNotFoundError'
-import delay from './utils/delay'
 import env from './config/env'
-import ProxyPage from './types/ProxyPage'
 
 const { platformUrl } = env
 
@@ -34,12 +32,9 @@ async function main() {
   })
   
   // @ts-ignore
-  const controller = buildController(proxyPage)
+  const taskManager = buildTaskManager(proxyPage)
 
-  for (const action of controller) {
-    await action()
-    await delay(1000)
-  }
+  await taskManager.run()
 
   await browser.close()
   console.log('Wow, you just did all of your course, go take 5')
